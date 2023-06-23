@@ -1,25 +1,24 @@
 # Maintainer: Tim Hellhake
 
 pkgname=rider
-pkgver='2018.1'
+pkgver='2023.1.3'
 pkgrel=1
 epoch=1
-pkgdesc='A cross-platform C# IDE by JetBrains.'
-arch=('any')
-options=('!strip')
+pkgdesc='A cross-platform .NET IDE by JetBrains.'
+arch=('x86_64' 'aarch64')
+options=('!strip' 'staticlibs')
 url='https://www.jetbrains.com/rider/'
 license=('Commercial')
-optdepends=('mono: .NET runtime' 'msbuild-15-bin: build .NET Core projects')
+makedepends=('gendesk')
+optdepends=('mono: .NET runtime' 'msbuild: build .NET Core projects')
 provides=('rider')
 conflicts=('rider')
 
 _installdir='/usr/share'
 _pkgdir="JetBrains Rider-${pkgver}"
 _srcfile="JetBrains.Rider-${pkgver}.tar.gz"
-source=("https://download-cf.jetbrains.com/rider/${_srcfile}"
-        'rider.desktop')
-sha256sums=('b46e68ee58ddcdfa0c9560215d1ec80492e2caeda85819f1366762e8c5f08472'
-            '91f41e1a5deae9f66bab7d7798a679a39350120aa229b4093415ef8269449714')
+source=("https://download-cf.jetbrains.com/rider/${_srcfile}")
+sha256sums=('192be48828cb7515e8158cec8aa6ba4d320d3b65ebd09a921e85085143e9bd56')
 
 package() {
     cd "${srcdir}"
@@ -32,9 +31,7 @@ package() {
     ln -s "${_installdir}/${pkgname}"/bin/rider.sh "${pkgdir}"/usr/bin/"${pkgname}"
 
     install -d -m755 "$pkgdir"/usr/share/applications
-    sed -i "s#Version=#Version=${pkgver}#g" "${pkgname}.desktop"
-    sed -i "s#Icon=#Icon=${_installdir}/${pkgname}/bin/rider.png#g" "${pkgname}.desktop"
-    sed -i "s#Exec=#Exec=\"${_installdir}/${pkgname}/bin/rider.sh\" %f#g" "${pkgname}.desktop"
-    sed -i "s/Comment=/Comment=${pkgdesc}/g" "${pkgname}.desktop"
+    gendesk -f -n --pkgname "$pkgname" --pkgdesc "$pkgdesc" --exec "${_installdir}/${pkgname}/bin/rider.sh %f" --icon "${_installdir}/${pkgname}/bin/rider.png"
+    echo "StartupWMClass=jetbrains-rider" >> "${pkgname}.desktop"
     install -m644 "${srcdir}/${pkgname}.desktop" "${pkgdir}/usr/share/applications"
 }
